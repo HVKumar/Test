@@ -5,7 +5,6 @@
         <artifactId>httpclient5</artifactId>
         <version>5.4</version>
     </dependency>
-    
     <!-- JSON library (Gson) -->
     <dependency>
         <groupId>com.google.code.gson</groupId>
