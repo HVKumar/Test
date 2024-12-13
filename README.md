@@ -1,30 +1,15 @@
-<dependencies>
-    <!-- Apache HttpClient -->
-    <dependency>
-        <groupId>org.apache.httpcomponents.client5</groupId>
-        <artifactId>httpclient5</artifactId>
-        <version>5.4</version>
-    </dependency>
-    <!-- JSON library (Gson) -->
-    <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>2.10.1</version>
-    </dependency>
-</dependencies>
-
-
-
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.sync.HttpClients;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import java.io.IOException;
+
+
 
 public class ApiPoster {
 
@@ -59,7 +44,8 @@ public class ApiPoster {
             try (CloseableHttpResponse response = httpClient.execute(postRequest)) {
                 int statusCode = response.getCode();
                 if (statusCode == 200) {
-                    String responseBody = new String(response.getEntity().getContent().readAllBytes());
+                    // Properly extract and convert the response entity
+                    String responseBody = EntityUtils.toString(response.getEntity());
                     JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
                     return responseJson.get("token").getAsString();
                 } else {
@@ -86,7 +72,8 @@ public class ApiPoster {
             try (CloseableHttpResponse response = httpClient.execute(postRequest)) {
                 int statusCode = response.getCode();
                 if (statusCode == 200) {
-                    String responseBody = new String(response.getEntity().getContent().readAllBytes());
+                    // Properly extract and convert the response entity
+                    String responseBody = EntityUtils.toString(response.getEntity());
                     System.out.println("API Response: " + responseBody);
                 } else {
                     System.err.println("API call failed with status: " + statusCode);
