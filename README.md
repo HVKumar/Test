@@ -1,5 +1,30 @@
-import okhttp3.*;
-import com.google.gson.*;
+<dependencies>
+    <!-- Apache HttpClient -->
+    <dependency>
+        <groupId>org.apache.httpcomponents.client5</groupId>
+        <artifactId>httpclient5</artifactId>
+        <version>5.4</version>
+    </dependency>
+    
+    <!-- JSON library (Gson) -->
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.10.1</version>
+    </dependency>
+</dependencies>
+
+
+
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.sync.HttpClients;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.ContentType;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 
 public class ApiPoster {
@@ -26,22 +51,22 @@ public class ApiPoster {
         json.addProperty("clientId", clientId);
         json.addProperty("clientSecret", clientSecret);
 
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(json.toString(), MediaType.get("application/json"));
+        // Initialize HttpClient
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost postRequest = new HttpPost(tokenApiUrl);
+            postRequest.setEntity(new StringEntity(json.toString(), ContentType.APPLICATION_JSON));
 
-        Request request = new Request.Builder()
-                .url(tokenApiUrl)
-                .post(body)
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                String responseBody = response.body().string();
-                JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
-                return responseJson.get("token").getAsString();
-            } else {
-                System.err.println("Token API call failed: " + response.code());
-                return null;
+            // Execute request
+            try (CloseableHttpResponse response = httpClient.execute(postRequest)) {
+                int statusCode = response.getCode();
+                if (statusCode == 200) {
+                    String responseBody = new String(response.getEntity().getContent().readAllBytes());
+                    JsonObject responseJson = JsonParser.parseString(responseBody).getAsJsonObject();
+                    return responseJson.get("token").getAsString();
+                } else {
+                    System.err.println("Token API call failed with status: " + statusCode);
+                    return null;
+                }
             }
         }
     }
@@ -52,21 +77,22 @@ public class ApiPoster {
         json.addProperty("key1", "value1");
         json.addProperty("key2", "value2");
 
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(json.toString(), MediaType.get("application/json"));
+        // Initialize HttpClient
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost postRequest = new HttpPost(apiUrl);
+            postRequest.setHeader("Authorization", "Bearer " + token);
+            postRequest.setEntity(new StringEntity(json.toString(), ContentType.APPLICATION_JSON));
 
-        Request request = new Request.Builder()
-                .url(apiUrl)
-                .addHeader("Authorization", "Bearer " + token)
-                .post(body)
-                .build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful()) {
-                System.out.println("API Response: " + response.body().string());
-            } else {
-                System.err.println("API call failed: " + response.code());
+            // Execute request
+            try (CloseableHttpResponse response = httpClient.execute(postRequest)) {
+                int statusCode = response.getCode();
+                if (statusCode == 200) {
+                    String responseBody = new String(response.getEntity().getContent().readAllBytes());
+                    System.out.println("API Response: " + responseBody);
+                } else {
+                    System.err.println("API call failed with status: " + statusCode);
+                }
             }
         }
     }
-}# Test
+}
