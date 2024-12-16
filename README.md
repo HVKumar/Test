@@ -90,3 +90,72 @@ public class ApiPoster {
         }
     }
 }
+
+
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class OracleDBConnection {
+    public static Connection getConnection() throws SQLException {
+        String dbUrl = "jdbc:oracle:thin:@your-db-host:1521:your-service-name";
+        String dbUser = "your-username";
+        String dbPassword = "your-password";
+
+        // Load Oracle JDBC Driver (optional for newer versions)
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Oracle JDBC Driver not found. Add it to your classpath.");
+            e.printStackTrace();
+        }
+
+        return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+    }
+}
+
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+public class FetchDetailsFromDB {
+
+    public static void fetchDetails(String keyFromApiResponse) {
+        String query = "SELECT column1, column2 FROM your_table WHERE some_column = ?";
+
+        try (Connection conn = OracleDBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Set the value from API response
+            stmt.setString(1, keyFromApiResponse);
+
+            // Execute the query
+            ResultSet rs = stmt.executeQuery();
+
+            // Process the results
+            while (rs.next()) {
+                String column1 = rs.getString("column1");
+                String column2 = rs.getString("column2");
+                System.out.println("Column1: " + column1 + ", Column2: " + column2);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Database operation failed.");
+            e.printStackTrace();
+        }
+    }
+}
+
+
+public static void main(String[] args) {
+    // Example API response
+    String apiResponseKey = "some-value-from-api";
+
+    // Fetch details from Oracle DB
+    FetchDetailsFromDB.fetchDetails(apiResponseKey);
+}
+
+
+SELECT name, age FROM employees WHERE id = 12345;
