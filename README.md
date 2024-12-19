@@ -165,12 +165,16 @@ SELECT name, age FROM employees WHERE id = 12345;
 
 package test;
 
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ApiPostGuiWithTabs {
+public class IntegratedApiDatabaseGui {
     public static void main(String[] args) {
         // Create the main frame
         JFrame frame = new JFrame("API Post GUI with Tabs");
@@ -298,6 +302,28 @@ public class ApiPostGuiWithTabs {
             }
         });
 
+        
+        // Submit Button Action
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String token = getToken();
+                    String payload = "{\"field1\":\"value1\", \"field2\":\"value2\"}";
+                    requestArea.setText(payload);
+                    String apiResponse = postJsonWithToken(token, payload);
+                    responseArea.setText(apiResponse);
+
+                    String dbKey = extractKeyFromApiResponse(apiResponse);
+                    String dbResults = queryDatabase(dbKey);
+                    outputArea.setText(dbResults);
+                } catch (Exception ex) {
+                    outputArea.setText("Error: " + ex.getMessage());
+                }
+            }
+        });
+
+       // return mainTabPanel;
         // Display the frame
         frame.setVisible(true);
     }
@@ -329,5 +355,25 @@ public class ApiPostGuiWithTabs {
         comboBoxes.add(dropDown2);
         panel.add(dropDown2);
         return panel;
+    }
+    
+    private static String getToken() throws IOException {
+        // Token retrieval logic
+        return "dummy-token"; // Replace with real token logic
+    }
+
+    private static String postJsonWithToken(String token, String payload) throws IOException {
+        // API call logic
+        return "{\"key\":\"some-db-key\"}"; // Replace with actual API response
+    }
+
+    private static String extractKeyFromApiResponse(String response) {
+        // Extract key logic
+        return "some-db-key"; // Replace with actual extraction
+    }
+
+    private static String queryDatabase(String key) {
+        // DB query logic
+        return "Database Result"; // Replace with actual DB result
     }
 }
